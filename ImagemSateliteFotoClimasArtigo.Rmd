@@ -1,0 +1,275 @@
+---
+output:
+  html_document:
+    md_extensions: -autolink_bare_uris+hard_line_breaks
+---
+<html>
+<head>
+<title>fichas</title>
+<style type="text/css">
+body{
+		margin-top: 0px;
+		margin-right: 0px;
+		margin-bottom: 0px;
+		margin-left: 0px;
+		font: 12px arial, sans-serif;
+		border: none;
+	}</style>
+</head>
+
+<body>
+
+<table  border='0' width='100%'>
+<tr width='100%'> 
+<td width='100%' align="center">
+
+## `r as.character(x$municipio[linha])`-`r as.character(x$uf[linha])`
+### `r as.character(x$localidade[linha])`
+
+</td></tr>
+<tr width='100%'> 
+<td width='100%' align="center">
+
+```{r localizacao, echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE, out.width='100%'}
+maptype = c("roadmap", "mobile", "satellite", "terrain", "hybrid", "mapmaker-roadmap", "mapmaker-hybrid")
+#x=data.frame(x, stringsAsFactors = F)
+dir.fotos <- 'C:/Dados/GitHub/DataClim/fotos'
+
+lat <- c(min(x$DecLat[linha]),max(x$DecLat[linha])) 
+lon <- c(min(x$DecLong[linha]),max(x$DecLong[linha]))
+mymarkers <- cbind.data.frame(x$DecLat[linha], x$DecLong[linha], x$municipio[linha])
+names(mymarkers) <- c("lat", "lon", "ref")  #assign column headings
+center = c(x$DecLat[linha], x$DecLong[linha])
+
+plot.new()  
+par(mfrow=c(2,2), mai=c(0,0,0,0),mar=c(0,0,0,0))
+  plot.mapa.paleo(x[linha,]) 
+  legend("topright", legend = '1.1 ', bty = 'n', bg = "white")
+  
+  PlotOnStaticMap(GetMap.bbox(center= center, destfile= "x.png", markers=mymarkers, zoom=13, maptype=maptype[4]))
+  legend("topright", legend = '1.2 ', bty = 'n', bg = "white")
+
+  plot.mapa.paleo(x[linha,],fundo='bioma') 
+  legend("topright", legend = '1.3 ', bty = 'n', bg = "white")
+
+  #
+  PlotOnStaticMap(GetMap.bbox(center= center, destfile= "x.png", markers=mymarkers, zoom=17, maptype=maptype[5]))
+  legend("topright", legend = '1.4 ', bty = 'n', bg = "white")
+```
+</p>##### <b>Figure 1.</b> Location by Brazilian states(1.1) and biomes (1.3). Releve (1.2) and satellite image (1.4). 
+
+```{r fotos, echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE, out.width='50%'}
+  
+  par(mfrow=c(1,2), mai=c(0,0,0,0),mar=c(0,0,0,0))
+  jpg <- file.path(dir.fotos, paste0(as.character(x$foto1[linha]),".jpg") )
+  if (file.exists(jpg)) {knitr::include_graphics(jpg)}
+  jpg <- file.path(dir.fotos, paste0(as.character(x$foto2[linha]),".jpg") )
+  if (file.exists(jpg)) {knitr::include_graphics(jpg)}
+```
+</p>##### <b>Figure 2.</b> Field photography, by Pablo Hendrigo in `r x$data.foto1[linha]` and `r x$data.foto2[linha]`
+<!-- </p>##### <b>Figure 2.</b> field photography, `r as.character(x$legenda[linha])`  -->
+</td></tr>
+
+<tr width='100%'> <td width='100%' align="center">
+```{r locality, echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE, out.width='75%'}
+  #
+  campos <- c('municipio','uf','localidade', 'descricao.afloramento', 'tipo.macico', 'caa', 'fed', 'fesd', 'fod', 'fom', 'fac', 'mc')
+  nome.campos <- c('County','State Province','Locality', 'Description of Limestine Outcrop', 'Type Massif Dissolution', 'T', 'C', 'F', 'D', 'M', 'K', 'P')
+  kable(x[linha,campos], 
+        caption = 'Table 1. Landscape features',
+        format = "markdown", 
+        digits = 2,
+        row.names = F,
+        align = 'c', 
+        col.names = nome.campos)
+
+  
+  leg = data.frame(txt="T=Savana-Estépica, C=Floresta Estacional Decidual, F=Floresta Estacional Semidecidual, D=Floresta Ombrófila Densa, M=Floresta Ombrófila Mista, K=Formação Aberta do Carste, P=Formações com influência fluvial, 'Mata Ciliar'.")
+  kable(leg$txt[1],col.names =' Column Names')
+  
+  if (x$observacao[linha]!=""){kable(x$observacao[linha],col.names ='*')}
+
+  #
+  campos <- c("DecLong", "DecLat", "dominioFitogeografico", "baciaHidrografica")
+  nome.campos <- c('Decimal Longitude',
+                   'Decimal Latitude',
+                   'Phytogeographic Domain',
+                   'Hydrographic Basin')
+  kable(x[linha,campos], 
+        caption = 'Seasonality Criteria I Precipitation <= 2 x Temperature ',
+        format = "markdown", 
+        digits = 2,
+        row.names = F,
+        align = 'c', 
+        col.names = nome.campos)
+  
+  #
+  campos <- c("mseco.p2t", "mchuva.p2t", 'tipoSazonalidadeI')
+  nome.campos <- c('Month precipitation Less than 2 x Temperature',
+                   'Month precipitation Greater than 2 x temperature',
+                   'Type Seasonality I')
+  kable(x[linha,campos], 
+        caption = 'Seasonality Criteria I Precipitation <= 2 x Temperature ',
+        format = "markdown", 
+        digits = 2,
+        row.names = F,
+        align = 'c', 
+        col.names = nome.campos)
+
+  #
+  campos <- c("predrymonth", "premoistmonth",'tipoSazonalidadeII')
+  nome.campos <- c('Month precipitation < 60 mm',
+                   'Month precipitation > 100 mm',
+                   'Type Seasonality II')
+  kable(x[linha,campos], 
+        caption = "Seasonality Criteria I Precipitation <= 2 x Temperature",
+        format = "markdown", 
+        digits = 2,
+        row.names = F,
+        align = 'c', 
+        col.names = nome.campos)
+        
+
+  #
+  campos <- c("prebio01", "prebio05", "prebio06", "prebio12", "koppen")
+  nome.campos <- c('Annual Mean Temperature',
+                   'Max. Temperature of Warmest Month',
+                   'Min. Temperature of Coldest Mont',
+                   'Annual Precipitation',
+                   'koppen')
+  kable(x[linha,campos], 
+        caption = 'Temperature and Precipitation',
+        format = "markdown", 
+        digits = 2,
+        row.names = F,
+        align = 'c', 
+        col.names = nome.campos)
+
+  
+  # Tepereratura Media Minima Maxima, 
+
+  #WALTER H & LIETH H (1960): Klimadiagramm Weltatlas. G. Fischer, Jena.
+  par(mfrow=c(1,1), mai=c(0,0,0,0),mar=c(0,0,0,0))
+  # plot.new()
+  
+  #
+  par(mfrow=c(1,1), mai=c(0,0,0,0),mar=c(0,0,0,0))
+  paleo.plot.clima(x, 1, linha, linha3 = F) 
+```
+<p>##### <b>Figure 2.</b> Climatic diagram in current conditions (1960-1990). The diagram starts in June. <b>
+
+<p>##### As described by Walter & Lieth (1960), when monthly precipitation is greater than 100 mm, the scale is increased from 2mm/ºC to 20mm/ºC to avoid too high diagrams in very wet locations. This change is indicated by a black horizontal line, and the graph over it is filled in solid blue.
+<p>##### When the precipitation graph lies under the temperature graph (P < 2T) we have an arid period (filled in dotted red vertical lines).
+<p>#####Daily maximum average temperature of the hottest month and daily minimum average temperature of the coldest month are frequently used in vegetation studies, and are labeled in black at the left margin of the diagram.
+
+</td></tr>
+
+</table>
+
+<div style="page-break-after: always"></div>
+
+</body>
+</html>
+<div style="page-break-after: always"></div>
+
+<!-- carregar fotos, se exitiem -->
+
+<!-- <table  border='0' width='100%'> -->
+<!-- <tr width='100%'> -->
+<!-- <td width='100%' align="center"> -->
+
+<!-- ```{r carregafotos, echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE, out.width='50%'} -->
+<!--   fotos <- {}; i<-1 -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$foto1[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$foto2[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$caa_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   fpg <- file.path(dir.fotos, paste0(as.character(x$fed_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$fesd_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$fod_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$fom_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$fac_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   jpg <- file.path(dir.fotos, paste0(as.character(x$mc_foto[linha]),".jpg") ) -->
+<!--   if (file.exists(file.jpg)){fotos <- c(fotos,jpg)} -->
+
+<!--   par(mfrow=c(4,2), mai=c(0,0,0,0),mar=c(0,0,0,0)) -->
+<!--   # for (i in 1:length(fotos)){ -->
+<!--   #   knitr::include_graphics(fotos[i]) -->
+<!--   # } -->
+
+<!--   if (file.exists(fotos[1])){knitr::include_graphics(fotos[1])} -->
+<!--   if (file.exists(fotos[2])){knitr::include_graphics(fotos[2])} -->
+<!--   if (file.exists(fotos[3])){knitr::include_graphics(fotos[3])} -->
+<!--   if (file.exists(fotos[4])){knitr::include_graphics(fotos[4])} -->
+<!--   if (file.exists(fotos[5])){knitr::include_graphics(fotos[5])} -->
+<!--   if (file.exists(fotos[6])){knitr::include_graphics(fotos[6])} -->
+<!--   if (file.exists(fotos[7])){knitr::include_graphics(fotos[7])} -->
+<!--   if (file.exists(fotos[8])){knitr::include_graphics(fotos[8])} -->
+<!--   if (file.exists(fotos[9])){knitr::include_graphics(fotos[9])} -->
+
+<!--   # knitr::include_graphics(fotos[i]) -->
+<!--   # knitr::include_graphics(fotos[i+1]) -->
+<!--   # knitr::include_graphics(fotos[i]) -->
+<!--   # knitr::include_graphics(fotos[i+1]) -->
+
+
+<!-- ``` -->
+<!-- </p align='left'>##### Figure 3. Fotografia <i>in situ</i> -->
+<!-- </td></tr> -->
+<!-- </table> -->
+
+
+
+
+<!-- <table  border='0' width='100%'> -->
+<!-- <tr width='100%'> -->
+<!-- <td width='100%' align="center"> -->
+<!-- ```{r fotox, echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE, out.width='70%'} -->
+<!--   fotos <- {} -->
+<!--   file <- file.path(dir.fotos, paste0(as.character(x$foto1[linha]),".jpg") ) -->
+<!--   if (file.exists(file)){ -->
+<!--     fotos <- c(fotos,file)} -->
+<!--   file <- file.path(dir.fotos, paste0(as.character(x$foto2[linha]),".jpg") ) -->
+<!--   if (file.exists(file)){ -->
+<!--     fotos <- c(fotos,file)} -->
+<!--   knitr::include_graphics(fotos) -->
+<!-- ``` -->
+<!-- </p align='left'>##### Figure 3. Fotografia <i>in situ</i> -->
+<!-- </td></tr> -->
+<!-- </table> -->
+
+
+
+
+<!-- <table  border='0' width='100%'> -->
+<!-- <tr width='100%'> -->
+<!-- <td width='100%' align="center"> -->
+<!-- ```{r fotoy, echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE, out.width='70%'} -->
+<!--   par(mfrow=c(1,2), mai=c(0,0,0,0),mar=c(0,0,0,0)) -->
+<!--   file <- file.path(dir.fotos, paste0(as.character(x$foto1[linha]),".jpg") ) -->
+<!--   if (file.exists(file)){ -->
+<!--     knitr::include_graphics(file)} -->
+<!--   file <- file.path(dir.fotos, paste0(as.character(x$foto2[linha]),".jpg") ) -->
+<!--   if (file.exists(file)){ -->
+<!--     knitr::include_graphics(file)} -->
+<!-- ``` -->
+<!-- </p align='left'>##### Figure 3. Fotografia <i>in situ</i> -->
+<!-- </td></tr> -->
+<!-- </table> -->
+
