@@ -1,5 +1,4 @@
 ###-----------------------------------------------------------------------------------------###
-
 print.all.paleo.clim <- function(points,path='',save.par=T)
 {
   if(!path==''){path.root=getwd(); setwd(path)}

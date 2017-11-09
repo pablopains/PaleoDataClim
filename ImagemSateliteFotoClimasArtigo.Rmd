@@ -3,6 +3,7 @@ output:
   html_document:
     md_extensions: -autolink_bare_uris+hard_line_breaks
 ---
+
 <html>
 <head>
 <title>fichas</title>
